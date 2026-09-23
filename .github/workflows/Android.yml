@@ -1,0 +1,40 @@
+name: Android Build (Test)
+
+on:
+  workflow_dispatch:    # manual trigger only — run from the Actions tab in GitHub
+
+jobs:
+  build:
+    name: Build for Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true          # remove this line if you don't use Git LFS
+
+      - name: Cache Unity Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ github.sha }}
+          restore-keys: |
+            Library-Android-
+
+      - name: Run Unity Build (Android)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: Android
+          # unityVersion: auto   # auto-detects from ProjectSettings/ProjectVersion.txt
+          # androidKeystoreName / androidKeystoreBase64 / androidKeystorePass / androidKeyaliasName / androidKeyaliasPass
+          # ^ add these + matching secrets only once you need a signed release build, not needed for a debug/test APK
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: build/Android
