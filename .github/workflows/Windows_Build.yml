@@ -1,0 +1,41 @@
+name: Windows Build (Test)
+
+on:
+  push:
+    branches:
+      - main          # change to your working branch if different
+  workflow_dispatch:    # lets you trigger it manually from the GitHub UI too
+
+jobs:
+  build:
+    name: Build for Windows
+    runs-on: ubuntu-latest   # GameCI cross-builds Windows from a Linux runner via Mono/IL2CPP cross-compile
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true          # remove this line if you don't use Git LFS
+
+      - name: Cache Unity Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Windows-${{ github.sha }}
+          restore-keys: |
+            Library-Windows-
+
+      - name: Run Unity Build (Windows)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          # unityVersion: auto   # auto-detects from ProjectSettings/ProjectVersion.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/StandaloneWindows64
