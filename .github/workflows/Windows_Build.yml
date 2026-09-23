@@ -1,10 +1,7 @@
 name: Windows Build (Test)
 
 on:
-  push:
-    branches:
-      - main          # change to your working branch if different
-  workflow_dispatch:    # lets you trigger it manually from the GitHub UI too
+  workflow_dispatch:    # manual trigger only — run from the Actions tab in GitHub
 
 jobs:
   build:
